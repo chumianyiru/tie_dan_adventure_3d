@@ -26,17 +26,13 @@ jobs:
       image: barichello/godot-ci:4.3
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - run: yes | sdkmanager --licenses || true
-      - run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;23.2.8568313"
+      - name: Verify Godot & export templates
+        run: |
+          which godot && godot --version
+          ls -la /root/.local/share/godot/export_templates/ || true
+          ls -la /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable/ || true
       - name: Export Android APK
         run: |
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ANDROID_SDK_ROOT=$ANDROID_HOME
           mkdir -p build/android
           godot --headless --path . --export-release "Android" build/android/${EXPORT_NAME}-android.apk
       - uses: actions/upload-artifact@v4
