@@ -4,6 +4,7 @@
 [application]
 config/name="铁蛋的冒险日记 3D"
 config/description="3D 横版平台冒险手游"
+config/icon="res://assets/icon.jpg"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
 boot_splash/bg_color=Color(0.141176, 0.141176, 0.141176, 1)
