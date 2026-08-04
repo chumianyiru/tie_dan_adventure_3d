@@ -24,18 +24,22 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
-    env:
-      HOME: /root
     steps:
       - uses: actions/checkout@v4
+      - name: Configure environment
+        run: |
+          echo "HOME=/root" >> $GITHUB_ENV
+          echo "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" > /tmp/gtpath
       - name: Verify Godot & export templates
         run: |
+          export HOME=/root
           echo "HOME=$HOME"
           which godot && godot --version
           ls -la /root/.local/share/godot/export_templates/ || true
           ls -la /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable/ || true
       - name: Configure Godot Android settings
         run: |
+          export HOME=/root
           JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
           echo "Java SDK: $JAVA_HOME"
           mkdir -p /root/.config/godot
@@ -48,6 +52,7 @@ EOF
           cat /root/.config/godot/editor_settings-4.tres
       - name: Export Android APK
         run: |
+          export HOME=/root
           mkdir -p build/android
           godot --headless --path . --export-release "Android" build/android/${EXPORT_NAME}-android.apk
       - uses: actions/upload-artifact@v4
