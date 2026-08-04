@@ -160,7 +160,7 @@ func _load_level():
 
 	# 天空色与光照微调
 	var sky_hue := fmod(level * 0.03, 1.0)
-	var sky := $WorldEnvironment.environment
+	var sky: Environment = $WorldEnvironment.environment
 	sky.background_color = Color.from_hsv(sky_hue, 0.35, 0.95)
 	$DirectionalLight3D.light_color = Color.from_hsv(fmod(sky_hue + 0.08, 1.0), 0.25, 1.0)
 
@@ -185,7 +185,7 @@ func _load_level():
 			var z := rng.randf_range(-10, -5) if rng.randf() > 0.5 else rng.randf_range(5, 10)
 			level_root.add_child(_create_grass(Vector3(i + rng.randf_range(-1, 1), 0, z)))
 		if rng.randf() > 0.92:
-			var tx := clamp(i + rng.randf_range(5, 15), 10, finish_x - 20)
+			var tx: float = clamp(i + rng.randf_range(5, 15), 10, finish_x - 20)
 			level_root.add_child(_create_tree(Vector3(tx, 0, rng.randf_range(-11, 11))))
 
 	# 空中平台
@@ -521,7 +521,7 @@ func _create_enemy(pos: Vector3, dmg: float, difficulty: float) -> CharacterBody
 	# 角
 	for side in [-1, 1]:
 		var horn := MeshInstance3D.new()
-		horn.mesh = ConeMesh.new()
+		horn.mesh = CylinderMesh.new()
 		horn.mesh.top_radius = 0.0
 		horn.mesh.bottom_radius = 0.12
 		horn.mesh.height = 0.5
@@ -666,7 +666,7 @@ func _create_castle(pos: Vector3) -> StaticBody3D:
 
 	# 塔顶
 	var roof := MeshInstance3D.new()
-	roof.mesh = ConeMesh.new()
+	roof.mesh = CylinderMesh.new()
 	roof.mesh.top_radius = 0.2
 	roof.mesh.bottom_radius = 3.2
 	roof.mesh.height = 3.5
@@ -712,7 +712,7 @@ func _create_tree(pos: Vector3) -> Node3D:
 
 	for i in 3:
 		var leaf := MeshInstance3D.new()
-		leaf.mesh = ConeMesh.new()
+		leaf.mesh = CylinderMesh.new()
 		leaf.mesh.top_radius = 0.3
 		leaf.mesh.bottom_radius = 1.4 - i * 0.25
 		leaf.mesh.height = 2.0
