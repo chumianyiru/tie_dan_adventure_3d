@@ -59,13 +59,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download Godot macOS editor
         run: |
-          curl --retry 5 --retry-delay 5 --max-time 300 -LO https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/${GODOT_ZIP}
+          curl --retry 5 --retry-delay 5 --max-time 120 -LO https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${GODOT_ZIP}
           unzip -q ${GODOT_ZIP}
           mv Godot.app /Applications/Godot.app
           sudo ln -s /Applications/Godot.app/Contents/MacOS/Godot /usr/local/bin/godot
       - name: Install export templates
         run: |
-          curl --retry 5 --retry-delay 5 --max-time 300 -LO https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/${TEMPLATES_ZIP}
+          curl --retry 5 --retry-delay 5 --max-time 120 -LO https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${TEMPLATES_ZIP}
           mkdir -p ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable
           unzip -q ${TEMPLATES_ZIP} -d ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable
       - name: Export iOS Xcode project
