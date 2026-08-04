@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8yvxg3ulq3a"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_abc12"]
+[ext_resource type="Environment" uid="uid://b2m1qxkl2q0qo" path="res://assets/environment.tres" id="2_env12"]
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_abc12")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("2_env12")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 10, 20, 10)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 12, 12)
+projection = 1
+size = 12.0
+far = 200.0

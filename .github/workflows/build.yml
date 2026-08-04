@@ -1,0 +1,99 @@
+name: Build Godot Android & iOS
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  GODOT_VERSION: 4.3
+  EXPORT_NAME: tie_dan_adventure_3d
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3-android
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure export templates directory
+        run: mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Export Android APK
+        run: |
+          mkdir -p build/android
+          godot --headless --path . --export-release "Android" build/android/${EXPORT_NAME}-android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/android/${EXPORT_NAME}-android.apk
+
+  build-ios:
+    runs-on: macos-latest
+    env:
+      GODOT_ZIP: Godot_v4.3-stable_macos.universal.zip
+      TEMPLATES_ZIP: Godot_v4.3-stable_export_templates.tpz
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Godot macOS editor
+        run: |
+          curl -LO https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/${GODOT_ZIP}
+          unzip -q ${GODOT_ZIP}
+          mv Godot.app /Applications/Godot.app
+          sudo ln -s /Applications/Godot.app/Contents/MacOS/Godot /usr/local/bin/godot
+      - name: Install export templates
+        run: |
+          curl -LO https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/${TEMPLATES_ZIP}
+          mkdir -p ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable
+          unzip -q ${TEMPLATES_ZIP} -d ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable
+      - name: Export iOS Xcode project
+        run: |
+          mkdir -p build/ios
+          godot --headless --path . --export-release "iOS" build/ios/${EXPORT_NAME}.xcodeproj
+      - name: Build iOS app (unsigned)
+        run: |
+          cd build/ios
+          xcodebuild -project ${EXPORT_NAME}.xcodeproj -scheme ${EXPORT_NAME} -sdk iphoneos -configuration Release archive -archivePath ${EXPORT_NAME}.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | tee xcodebuild.log
+          mkdir -p Payload
+          cp -R ${EXPORT_NAME}.xcarchive/Products/Applications/*.app Payload/ || true
+          # fallback: find .app anywhere in archive
+          find ${EXPORT_NAME}.xcarchive -name "*.app" -maxdepth 4 -exec cp -R {} Payload/ \;
+          zip -r ${EXPORT_NAME}-ios.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: build/ios/${EXPORT_NAME}-ios.ipa
+
+  release:
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          find ./artifacts -type f | while read f; do
+            cp "$f" "release/$(basename "$f")"
+          done
+          ls -la release/
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.version }}
+          name: 铁蛋的冒险日记 3D ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.version }}
+          files: release/*
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
