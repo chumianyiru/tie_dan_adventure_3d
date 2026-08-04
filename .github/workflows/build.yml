@@ -66,8 +66,9 @@ jobs:
       - name: Install export templates
         run: |
           curl --retry 5 --retry-delay 5 --max-time 120 -LO https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${TEMPLATES_ZIP}
-          mkdir -p ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable
-          unzip -q ${TEMPLATES_ZIP} -d ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable
+          mkdir -p ~/Library/Application\ Support/Godot/export_templates
+          unzip -q ${TEMPLATES_ZIP} -d ~/Library/Application\ Support/Godot/export_templates
+          ls -la ~/Library/Application\ Support/Godot/export_templates/${GODOT_VERSION}.stable/
       - name: Export iOS Xcode project
         run: |
           mkdir -p build/ios
