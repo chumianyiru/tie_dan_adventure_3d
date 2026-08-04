@@ -2,10 +2,14 @@ name: Build Godot Android & iOS
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
 
 permissions:
   contents: write
@@ -22,14 +26,9 @@ jobs:
       image: barichello/godot-ci:4.3
     steps:
       - uses: actions/checkout@v4
-      - name: Configure environment
-        run: |
-          echo "HOME=/root" >> $GITHUB_ENV
-          echo "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" > /tmp/gtpath
       - name: Verify Godot & export templates
         run: |
           export HOME=/root
-          echo "HOME=$HOME"
           which godot && godot --version
           ls -la /root/.local/share/godot/export_templates/ || true
           ls -la /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable/ || true
@@ -39,12 +38,7 @@ jobs:
           JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
           echo "Java SDK: $JAVA_HOME"
           mkdir -p /root/.config/godot
-          cat > /root/.config/godot/editor_settings-4.tres <<EOF
-[gd_resource type="EditorSettings" format=3]
-
-[resource]
-export/android/java_sdk_path = "$JAVA_HOME"
-EOF
+          printf '%s\n' '[gd_resource type="EditorSettings" format=3]' '' '[resource]' "export/android/java_sdk_path = \"$JAVA_HOME\"" > /root/.config/godot/editor_settings-4.tres
           cat /root/.config/godot/editor_settings-4.tres
       - name: Export Android APK
         run: |
@@ -95,6 +89,7 @@ EOF
   release:
     needs: [build-android, build-ios]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -109,8 +104,8 @@ EOF
           ls -la release/
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.version }}
-          name: 铁蛋的冒险日记 3D ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.version }}
+          tag_name: ${{ github.ref_name }}
+          name: 铁蛋的冒险日记 3D ${{ github.ref_name }}
           files: release/*
           draft: false
           prerelease: true
