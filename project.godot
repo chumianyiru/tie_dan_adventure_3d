@@ -3,7 +3,7 @@
 
 [application]
 config/name="铁蛋的冒险日记 3D"
-config/description="2D 横屏改为 3D 平台冒险手游"
+config/description="3D 横版平台冒险手游"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
 boot_splash/bg_color=Color(0.141176, 0.141176, 0.141176, 1)
