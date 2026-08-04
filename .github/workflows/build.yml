@@ -2,14 +2,10 @@ name: Build Godot Android & iOS
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g. v0.1.0)'
-        required: true
-        default: 'v0.1.0'
 
 permissions:
   contents: write
